@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { api } from '@/lib/api'
 import type { Contact, DialPage } from '@/types'
@@ -10,6 +10,7 @@ import ContactFormModal from '@/components/ContactFormModal.vue'
 import ShareModal from '@/components/ShareModal.vue'
 import {
   ArrowLeft,
+  GripVertical,
   Pencil,
   Plus,
   Share2,
@@ -30,6 +31,9 @@ const form = ref({
   bg_color: '#0f172a',
   bg_image: '',
   font_size: 20,
+  avatar_size: 48,
+  phone_size: 12,
+  show_name: true,
 })
 
 const showContactModal = ref(false)
@@ -37,18 +41,25 @@ const editingContact = ref<Contact | null>(null)
 const showShare = ref(false)
 const shareContact = ref<Contact | null>(null)
 const bgInput = ref<HTMLInputElement | null>(null)
-const saving = ref(false)
+const dragIndex = ref<number | null>(null)
+
+let suppressAutoSave = false
+let autoSaveTimer: number | undefined
 
 async function load() {
   loading.value = true
   try {
     page.value = await api.getPage(pageId)
+    suppressAutoSave = true
     form.value = {
       name: page.value.name,
       bg_type: page.value.bg_type,
       bg_color: page.value.bg_color,
       bg_image: page.value.bg_image,
       font_size: page.value.font_size,
+      avatar_size: page.value.avatar_size ?? 48,
+      phone_size: page.value.phone_size ?? 12,
+      show_name: page.value.show_name ?? true,
     }
   } catch (e) {
     toast((e as Error).message, 'error')
@@ -57,17 +68,26 @@ async function load() {
   }
 }
 
-async function savePage() {
-  saving.value = true
+async function persistSettings() {
   try {
     page.value = await api.updatePage(pageId, { ...form.value })
-    toast('已保存', 'success')
   } catch (e) {
     toast((e as Error).message, 'error')
-  } finally {
-    saving.value = false
   }
 }
+
+watch(
+  form,
+  () => {
+    if (suppressAutoSave) {
+      suppressAutoSave = false
+      return
+    }
+    window.clearTimeout(autoSaveTimer)
+    autoSaveTimer = window.setTimeout(persistSettings, 400)
+  },
+  { deep: true },
+)
 
 function openAdd() {
   editingContact.value = null
@@ -130,6 +150,51 @@ async function onPickBg(e: Event) {
   }
 }
 
+function onDragStart(index: number, e: DragEvent) {
+  dragIndex.value = index
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', String(index))
+  }
+}
+
+function onDragOver(e: DragEvent) {
+  e.preventDefault()
+  if (e.dataTransfer) e.dataTransfer.dropEffect = 'move'
+}
+
+async function onDrop(index: number) {
+  const from = dragIndex.value
+  const contacts = page.value?.contacts
+  if (from === null || from === index || !contacts) return
+
+  const next = [...contacts]
+  const [moved] = next.splice(from, 1)
+  next.splice(index, 0, moved)
+  page.value!.contacts = next
+
+  dragIndex.value = null
+  await saveOrder()
+}
+
+function onDragEnd() {
+  dragIndex.value = null
+}
+
+async function saveOrder() {
+  const contacts = page.value?.contacts
+  if (!contacts) return
+  try {
+    await api.reorderContacts(
+      pageId,
+      contacts.map((c) => c.id),
+    )
+  } catch (e) {
+    toast((e as Error).message, 'error')
+    await load()
+  }
+}
+
 onMounted(load)
 </script>
 
@@ -156,14 +221,6 @@ onMounted(load)
           >
             <Share2 class="w-4 h-4" />
             分享
-          </button>
-          <button
-            type="button"
-            class="rounded-xl bg-accent text-white px-4 py-2 text-sm font-semibold hover:bg-accent-dark transition-colors disabled:opacity-60"
-            :disabled="saving"
-            @click="savePage"
-          >
-            {{ saving ? '保存中…' : '保存' }}
           </button>
         </div>
       </div>
@@ -194,10 +251,20 @@ onMounted(load)
 
         <div v-else class="space-y-3">
           <div
-            v-for="contact in page.contacts"
+            v-for="(contact, index) in page.contacts"
             :key="contact.id"
-            class="flex items-center gap-4 rounded-2xl bg-surface shadow-card p-4"
+            draggable="true"
+            class="flex items-center gap-4 rounded-2xl bg-surface shadow-card p-4 cursor-grab transition-opacity"
+            :class="{ 'opacity-50': dragIndex === index }"
+            @dragstart="onDragStart(index, $event)"
+            @dragover="onDragOver"
+            @drop="onDrop(index)"
+            @dragend="onDragEnd"
           >
+            <div class="shrink-0 text-muted cursor-grab" title="拖动排序">
+              <GripVertical class="w-5 h-5" />
+            </div>
+
             <AvatarBadge
               :name="contact.name"
               :phone="contact.phone"
@@ -309,9 +376,27 @@ onMounted(load)
             </div>
           </div>
 
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-muted">显示名字</p>
+              <p class="text-xs text-muted mt-0.5">关闭后只显示头像与号码</p>
+            </div>
+            <button
+              type="button"
+              class="relative w-11 h-6 rounded-full transition-colors shrink-0"
+              :class="form.show_name ? 'bg-accent' : 'bg-line'"
+              @click="form.show_name = !form.show_name"
+            >
+              <span
+                class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform"
+                :class="form.show_name ? 'translate-x-5' : 'translate-x-0'"
+              ></span>
+            </button>
+          </div>
+
           <div class="grid gap-2">
             <div class="flex items-center justify-between">
-              <span class="text-sm text-muted">默认字号</span>
+              <span class="text-sm text-muted">名字大小</span>
               <span class="text-sm font-semibold">{{ form.font_size }}px</span>
             </div>
             <input
@@ -322,7 +407,36 @@ onMounted(load)
               step="1"
               class="w-full accent-[var(--c-accent)]"
             />
-            <p class="text-xs text-muted">字号会影响号码名称大小与每行列数</p>
+          </div>
+
+          <div class="grid gap-2">
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-muted">头像大小</span>
+              <span class="text-sm font-semibold">{{ form.avatar_size }}px</span>
+            </div>
+            <input
+              v-model.number="form.avatar_size"
+              type="range"
+              min="32"
+              max="160"
+              step="4"
+              class="w-full accent-[var(--c-accent)]"
+            />
+          </div>
+
+          <div class="grid gap-2">
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-muted">号码大小</span>
+              <span class="text-sm font-semibold">{{ form.phone_size }}px</span>
+            </div>
+            <input
+              v-model.number="form.phone_size"
+              type="range"
+              min="10"
+              max="48"
+              step="1"
+              class="w-full accent-[var(--c-accent)]"
+            />
           </div>
         </div>
       </section>

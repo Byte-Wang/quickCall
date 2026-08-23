@@ -20,9 +20,22 @@ class AuthController
             Response::error('该手机号已注册');
         }
 
+        $ip = self::clientIp();
+        if ($ip === '') {
+            Response::error('无法获取请求IP，禁止注册');
+        }
+
+        $stmt = Database::pdo()->prepare(
+            'SELECT COUNT(*) FROM users WHERE register_ip = ? AND created_at >= NOW() - INTERVAL 24 HOUR'
+        );
+        $stmt->execute([$ip]);
+        if ((int)$stmt->fetchColumn() >= 2) {
+            Response::error('同一IP24小时内最多注册2个账号');
+        }
+
         $hash = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = Database::pdo()->prepare('INSERT INTO users (phone, password_hash) VALUES (?, ?)');
-        $stmt->execute([$phone, $hash]);
+        $stmt = Database::pdo()->prepare('INSERT INTO users (phone, password_hash, register_ip) VALUES (?, ?, ?)');
+        $stmt->execute([$phone, $hash, $ip]);
 
         $userId = (int)Database::pdo()->lastInsertId();
         $token = Auth::issueToken($userId);
@@ -58,5 +71,25 @@ class AuthController
     public static function me(): void
     {
         Response::json(Auth::requireUser());
+    }
+
+    private static function clientIp(): string
+    {
+        $headers = [
+            'HTTP_X_REAL_IP',
+            'HTTP_X_FORWARDED_FOR',
+        ];
+        foreach ($headers as $key) {
+            $value = $_SERVER[$key] ?? '';
+            if ($value !== '') {
+                $ip = trim(explode(',', $value)[0]);
+                if (filter_var($ip, FILTER_VALIDATE_IP)) {
+                    return $ip;
+                }
+            }
+        }
+
+        $ip = trim((string)($_SERVER['REMOTE_ADDR'] ?? ''));
+        return filter_var($ip, FILTER_VALIDATE_IP) ? $ip : '';
     }
 }

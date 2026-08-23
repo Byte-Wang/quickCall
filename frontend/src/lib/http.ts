@@ -54,6 +54,9 @@ export async function request<T>(
   if (json.code !== 0) {
     if (json.code === 401) {
       clearToken()
+      if (window.location.hash !== '#/login') {
+        window.location.hash = '#/login'
+      }
     }
     throw new Error(json.message || '请求失败')
   }

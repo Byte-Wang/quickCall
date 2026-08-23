@@ -23,6 +23,9 @@ export interface DialPage {
   bg_color: string
   bg_image: string
   font_size: number
+  show_name?: boolean
+  avatar_size?: number
+  phone_size?: number
   contact_count?: number
   contacts?: Contact[]
 }

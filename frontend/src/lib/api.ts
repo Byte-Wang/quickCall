@@ -7,6 +7,9 @@ export interface PagePayload {
   bg_color?: string
   bg_image?: string
   font_size?: number
+  avatar_size?: number
+  phone_size?: number
+  show_name?: boolean
 }
 
 export interface ContactPayload {
@@ -78,6 +81,13 @@ export const api = {
 
   deleteContact(id: number) {
     return request<null>(`/api/contacts/${id}`, { method: 'DELETE' })
+  },
+
+  reorderContacts(pageId: number, ids: number[]) {
+    return request<null>(`/api/dial-pages/${pageId}/contacts/reorder`, {
+      method: 'PUT',
+      body: JSON.stringify({ ids }),
+    })
   },
 
   upload(file: File) {

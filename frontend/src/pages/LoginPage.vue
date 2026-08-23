@@ -9,9 +9,43 @@ const router = useRouter()
 const route = useRoute()
 const { login } = useAuth()
 
+const REMEMBER_KEY = 'quickdial_remember'
+
 const phone = ref('')
 const password = ref('')
+const remember = ref(false)
 const loading = ref(false)
+
+function loadRemembered() {
+  try {
+    const raw = localStorage.getItem(REMEMBER_KEY)
+    if (raw) {
+      const data = JSON.parse(raw)
+      phone.value = data.phone ?? ''
+      password.value = data.password ?? ''
+      remember.value = true
+    }
+  } catch {
+    // 忽略解析错误
+  }
+}
+
+function persistRemember() {
+  try {
+    if (remember.value) {
+      localStorage.setItem(
+        REMEMBER_KEY,
+        JSON.stringify({ phone: phone.value, password: password.value }),
+      )
+    } else {
+      localStorage.removeItem(REMEMBER_KEY)
+    }
+  } catch {
+    // 忽略存储异常
+  }
+}
+
+loadRemembered()
 
 async function submit() {
   if (!/^1\d{10}$/.test(phone.value)) {
@@ -26,6 +60,7 @@ async function submit() {
   loading.value = true
   try {
     await login(phone.value, password.value)
+    persistRemember()
     toast('登录成功', 'success')
     router.replace((route.query.redirect as string) || '/admin')
   } catch (e) {
@@ -109,6 +144,17 @@ async function submit() {
                 class="w-full rounded-xl border border-line bg-surface pl-10 pr-3 py-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition"
               />
             </div>
+          </label>
+
+          <label
+            class="flex items-center gap-2 text-sm text-muted select-none cursor-pointer"
+          >
+            <input
+              v-model="remember"
+              type="checkbox"
+              class="w-4 h-4 rounded accent-accent"
+            />
+            记住账号密码
           </label>
 
           <button

@@ -16,9 +16,7 @@ class DialPageController
         $pages = $stmt->fetchAll();
 
         foreach ($pages as &$p) {
-            $p['id'] = (int)$p['id'];
-            $p['user_id'] = (int)$p['user_id'];
-            $p['font_size'] = (int)$p['font_size'];
+            $p = self::normalizePage($p);
             $p['contact_count'] = (int)$p['contact_count'];
         }
         unset($p);
@@ -32,6 +30,12 @@ class DialPageController
         $name = trim((string)($body['name'] ?? ''));
         if ($name === '') {
             $name = '未命名拨号页';
+        }
+
+        $stmt = Database::pdo()->prepare('SELECT COUNT(*) FROM dial_pages WHERE user_id = ?');
+        $stmt->execute([$user['id']]);
+        if ((int)$stmt->fetchColumn() >= 10) {
+            Response::error('最多只能创建 10 个拨号页');
         }
 
         $slug = self::generateSlug();
@@ -81,6 +85,21 @@ class DialPageController
             $values[] = max(12, min(72, (int)$body['font_size']));
         }
 
+        if (array_key_exists('avatar_size', $body)) {
+            $fields[] = 'avatar_size = ?';
+            $values[] = max(32, min(160, (int)$body['avatar_size']));
+        }
+
+        if (array_key_exists('phone_size', $body)) {
+            $fields[] = 'phone_size = ?';
+            $values[] = max(10, min(48, (int)$body['phone_size']));
+        }
+
+        if (array_key_exists('show_name', $body)) {
+            $fields[] = 'show_name = ?';
+            $values[] = $body['show_name'] ? 1 : 0;
+        }
+
         if ($fields) {
             $fields[] = 'updated_at = CURRENT_TIMESTAMP';
             $values[] = $id;
@@ -122,9 +141,8 @@ class DialPageController
             Response::error('拨号页不存在或链接已失效', 404, 404);
         }
 
+        $page = self::normalizePage($page);
         unset($page['user_id']);
-        $page['id'] = (int)$page['id'];
-        $page['font_size'] = (int)$page['font_size'];
 
         $stmt = Database::pdo()->prepare(
             'SELECT id, dial_page_id, name, phone, avatar, bg_color, font_size, sort_order
@@ -156,10 +174,18 @@ class DialPageController
             return null;
         }
 
-        $page['id'] = (int)$page['id'];
-        $page['user_id'] = (int)$page['user_id'];
-        $page['font_size'] = (int)$page['font_size'];
-        return $page;
+        return self::normalizePage($page);
+    }
+
+    private static function normalizePage(array $p): array
+    {
+        $p['id'] = (int)$p['id'];
+        $p['user_id'] = (int)$p['user_id'];
+        $p['font_size'] = (int)$p['font_size'];
+        $p['avatar_size'] = (int)($p['avatar_size'] ?? 48);
+        $p['phone_size'] = (int)($p['phone_size'] ?? 12);
+        $p['show_name'] = (bool)($p['show_name'] ?? 1);
+        return $p;
     }
 
     private static function contacts(int $id): array

@@ -92,6 +92,10 @@ if ($resource === 'dial-pages') {
         ContactController::store($id, readBody());
     }
 
+    if ($id > 0 && ($segments[3] ?? '') === 'contacts' && ($segments[4] ?? '') === 'reorder' && $method === 'PUT') {
+        ContactController::reorder($id, readBody());
+    }
+
     if ($id > 0 && $method === 'GET') {
         DialPageController::show($id);
     }

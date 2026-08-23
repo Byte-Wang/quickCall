@@ -12,9 +12,11 @@ CREATE TABLE IF NOT EXISTS users (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键',
   phone VARCHAR(20) NOT NULL COMMENT '手机号（登录账号）',
   password_hash VARCHAR(255) NOT NULL COMMENT '密码哈希',
+  register_ip VARCHAR(45) NOT NULL DEFAULT '' COMMENT '注册IP',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (id),
-  UNIQUE KEY uk_users_phone (phone)
+  UNIQUE KEY uk_users_phone (phone),
+  KEY idx_users_register_ip_created (register_ip, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户';
 
 -- 登录令牌表
@@ -35,7 +37,10 @@ CREATE TABLE IF NOT EXISTS dial_pages (
   bg_type VARCHAR(16) NOT NULL DEFAULT 'color' COMMENT '背景类型：color/image',
   bg_color VARCHAR(16) NOT NULL DEFAULT '#0f172a' COMMENT '背景色',
   bg_image VARCHAR(255) NOT NULL DEFAULT '' COMMENT '背景图路径',
-  font_size INT NOT NULL DEFAULT 20 COMMENT '默认字号',
+  font_size INT NOT NULL DEFAULT 20 COMMENT '名字大小',
+  show_name TINYINT(1) NOT NULL DEFAULT 1 COMMENT '是否显示名字',
+  avatar_size INT NOT NULL DEFAULT 48 COMMENT '头像大小(px)',
+  phone_size INT NOT NULL DEFAULT 12 COMMENT '号码大小(px)',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (id),

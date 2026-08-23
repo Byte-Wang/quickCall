@@ -3,7 +3,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { api } from '@/lib/api'
 import type { Contact, DialPage } from '@/types'
-import { avatarSizeFor, columnCountFor, readableTextColor } from '@/lib/avatar'
+import { columnCountFor, readableTextColor } from '@/lib/avatar'
 import { apiUrl } from '@/lib/config'
 import AvatarBadge from '@/components/AvatarBadge.vue'
 import { Phone } from 'lucide-vue-next'
@@ -29,6 +29,10 @@ const columns = computed(() =>
 )
 
 const isSingleColumn = computed(() => columns.value === 1)
+
+const showName = computed(() => page.value?.show_name !== false)
+const avatarSize = computed(() => page.value?.avatar_size || 48)
+const phoneSize = computed(() => page.value?.phone_size || 12)
 
 const bgStyle = computed(() => {
   const p = page.value
@@ -203,8 +207,8 @@ onUnmounted(() => {
             :name="contact.name"
             :phone="contact.phone"
             :avatar="contact.avatar"
-            :size="avatarSizeFor(effectiveFont(contact))"
-            :font-size="Math.round(avatarSizeFor(effectiveFont(contact)) * 0.4)"
+            :size="avatarSize"
+            :font-size="Math.round(avatarSize * 0.4)"
           />
 
           <div
@@ -212,6 +216,7 @@ onUnmounted(() => {
             :class="isSingleColumn ? 'items-start' : 'items-center'"
           >
             <span
+              v-if="showName"
               class="font-semibold leading-tight"
               :style="{
                 color: contactTextColor(contact),
@@ -224,7 +229,7 @@ onUnmounted(() => {
               class="mt-1 flex items-center gap-1 opacity-70"
               :style="{
                 color: contactTextColor(contact),
-                fontSize: `${Math.max(12, Math.round(effectiveFont(contact) * 0.6))}px`,
+                fontSize: `${phoneSize}px`,
               }"
             >
               <Phone class="w-3 h-3" />

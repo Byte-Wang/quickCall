@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { nameInitials, phoneToColor } from '@/lib/avatar'
 import { apiUrl } from '@/lib/config'
+import { cachedImageUrl } from '@/lib/avatarCache'
 
 const props = withDefaults(
   defineProps<{
@@ -24,7 +25,35 @@ const bg = computed(() =>
 
 const initials = computed(() => nameInitials(props.name))
 
-const avatarSrc = computed(() => (props.avatar ? apiUrl(props.avatar) : ''))
+const imgSrc = ref('')
+
+async function resolveAvatar() {
+  if (!props.avatar) {
+    imgSrc.value = ''
+    return
+  }
+
+  const url = apiUrl(props.avatar)
+  try {
+    imgSrc.value = await cachedImageUrl(url)
+  } catch {
+    // 缓存/下载失败时回退到原始地址，交给浏览器直接加载
+    imgSrc.value = url
+  }
+}
+
+function revoke() {
+  if (imgSrc.value.startsWith('blob:')) {
+    URL.revokeObjectURL(imgSrc.value)
+  }
+}
+
+onMounted(resolveAvatar)
+watch(() => props.avatar, () => {
+  revoke()
+  resolveAvatar()
+})
+onUnmounted(revoke)
 </script>
 
 <template>
@@ -38,8 +67,8 @@ const avatarSrc = computed(() => (props.avatar ? apiUrl(props.avatar) : ''))
     }"
   >
     <img
-      v-if="avatar"
-      :src="avatarSrc"
+      v-if="avatar && imgSrc"
+      :src="imgSrc"
       :alt="name"
       class="w-full h-full object-cover"
     />

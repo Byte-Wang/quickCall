@@ -7,6 +7,12 @@ class ContactController
         $user = Auth::requireUser();
         self::assertPageOwned($pageId, $user['id']);
 
+        $stmt = Database::pdo()->prepare('SELECT COUNT(*) FROM contacts WHERE dial_page_id = ?');
+        $stmt->execute([$pageId]);
+        if ((int)$stmt->fetchColumn() >= 200) {
+            Response::error('每个拨号页最多添加 200 个号码');
+        }
+
         $name = trim((string)($body['name'] ?? ''));
         $phone = trim((string)($body['phone'] ?? ''));
 
@@ -86,6 +92,34 @@ class ContactController
 
         $stmt = Database::pdo()->prepare('DELETE FROM contacts WHERE id = ?');
         $stmt->execute([$id]);
+
+        Response::json(null);
+    }
+
+    public static function reorder(int $pageId, array $body): void
+    {
+        $user = Auth::requireUser();
+        self::assertPageOwned($pageId, $user['id']);
+
+        $ids = $body['ids'] ?? null;
+        if (!is_array($ids)) {
+            Response::error('排序数据无效');
+        }
+
+        $pdo = Database::pdo();
+        $pdo->beginTransaction();
+        try {
+            $stmt = $pdo->prepare(
+                'UPDATE contacts SET sort_order = ? WHERE id = ? AND dial_page_id = ?'
+            );
+            foreach ($ids as $index => $id) {
+                $stmt->execute([$index + 1, (int)$id, $pageId]);
+            }
+            $pdo->commit();
+        } catch (Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
 
         Response::json(null);
     }

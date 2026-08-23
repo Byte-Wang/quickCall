@@ -4,9 +4,21 @@ class Auth
 {
     public static function issueToken(int $userId): string
     {
-        $token = bin2hex(random_bytes(32));
-        $stmt = Database::pdo()->prepare('INSERT INTO auth_tokens (token, user_id) VALUES (?, ?)');
-        $stmt->execute([$token, $userId]);
+        $pdo = Database::pdo();
+        $pdo->beginTransaction();
+        try {
+            $stmt = $pdo->prepare('DELETE FROM auth_tokens WHERE user_id = ?');
+            $stmt->execute([$userId]);
+
+            $token = bin2hex(random_bytes(32));
+            $stmt = $pdo->prepare('INSERT INTO auth_tokens (token, user_id) VALUES (?, ?)');
+            $stmt->execute([$token, $userId]);
+            $pdo->commit();
+        } catch (Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+
         return $token;
     }
 
