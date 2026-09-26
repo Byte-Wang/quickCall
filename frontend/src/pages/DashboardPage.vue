@@ -7,6 +7,7 @@ import { useAuth } from '@/composables/useAuth'
 import { toast } from '@/composables/useToast'
 import BaseModal from '@/components/BaseModal.vue'
 import ShareModal from '@/components/ShareModal.vue'
+import HowToUseModal from '@/components/HowToUseModal.vue'
 import {
   LogOut,
   Pencil,
@@ -24,6 +25,7 @@ const pages = ref<DialPage[]>([])
 const loading = ref(true)
 const shareTarget = ref<DialPage | null>(null)
 const showCreate = ref(false)
+const showHowTo = ref(false)
 const createName = ref('')
 
 async function load() {
@@ -108,14 +110,23 @@ onMounted(load)
           <h1 class="text-2xl sm:text-3xl font-bold">拨号页</h1>
           <p class="mt-1 text-muted text-sm">创建并管理你的拨号通讯录</p>
         </div>
-        <button
-          type="button"
-          class="flex items-center gap-2 rounded-xl bg-accent text-white px-4 py-2.5 text-sm font-semibold hover:bg-accent-dark transition-colors"
-          @click="showCreate = true"
-        >
-          <Plus class="w-4 h-4" />
-          新建拨号页
-        </button>
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="flex items-center gap-2 rounded-xl border border-line px-4 py-2.5 text-sm font-semibold hover:bg-surface transition-colors"
+            @click="showHowTo = true"
+          >
+            如何使用
+          </button>
+          <button
+            type="button"
+            class="flex items-center gap-2 rounded-xl bg-accent text-white px-4 py-2.5 text-sm font-semibold hover:bg-accent-dark transition-colors"
+            @click="showCreate = true"
+          >
+            <Plus class="w-4 h-4" />
+            新建拨号页
+          </button>
+        </div>
       </div>
 
       <div v-if="loading" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -230,5 +241,7 @@ onMounted(load)
     </BaseModal>
 
     <ShareModal v-if="shareTarget" :page="shareTarget" @close="shareTarget = null" />
+
+    <HowToUseModal v-if="showHowTo" @close="showHowTo = false" />
   </div>
 </template>

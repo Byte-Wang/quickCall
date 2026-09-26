@@ -19,6 +19,7 @@ require __DIR__ . '/../src/controllers/AuthController.php';
 require __DIR__ . '/../src/controllers/DialPageController.php';
 require __DIR__ . '/../src/controllers/ContactController.php';
 require __DIR__ . '/../src/controllers/UploadController.php';
+require __DIR__ . '/../src/controllers/FeedbackController.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 $rawRoute = isset($_GET['r']) ? (string)$_GET['r'] : ($_SERVER['REQUEST_URI'] ?? '');
@@ -76,6 +77,10 @@ if ($resource === 'auth') {
 
 if ($resource === 'upload' && $method === 'POST') {
     UploadController::upload();
+}
+
+if ($resource === 'feedback' && $method === 'POST') {
+    FeedbackController::store(readBody());
 }
 
 if ($resource === 'dial-pages') {

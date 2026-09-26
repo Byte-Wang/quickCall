@@ -62,3 +62,20 @@ CREATE TABLE IF NOT EXISTS contacts (
   PRIMARY KEY (id),
   KEY idx_contacts_page (dial_page_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='号码';
+
+-- 意见反馈表
+CREATE TABLE IF NOT EXISTS feedback (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键',
+  user_id INT UNSIGNED NULL COMMENT '提交用户（未登录为空）',
+  content TEXT NOT NULL COMMENT '反馈内容',
+  user_agent VARCHAR(255) NOT NULL DEFAULT '' COMMENT '浏览器UA',
+  platform VARCHAR(64) NOT NULL DEFAULT '' COMMENT '操作系统平台',
+  language VARCHAR(32) NOT NULL DEFAULT '' COMMENT '浏览器语言',
+  screen VARCHAR(32) NOT NULL DEFAULT '' COMMENT '屏幕分辨率',
+  client_time DATETIME NULL COMMENT '客户端时间',
+  ip VARCHAR(45) NOT NULL DEFAULT '' COMMENT '提交IP',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (id),
+  KEY idx_feedback_user (user_id),
+  KEY idx_feedback_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='意见反馈';

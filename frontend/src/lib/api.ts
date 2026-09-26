@@ -20,6 +20,15 @@ export interface ContactPayload {
   font_size?: number | null
 }
 
+export interface FeedbackPayload {
+  content: string
+  user_agent: string
+  platform: string
+  language: string
+  screen: string
+  client_time: string
+}
+
 export const api = {
   register(phone: string, password: string) {
     return request<AuthPayload>('/api/auth/register', {
@@ -98,5 +107,12 @@ export const api = {
 
   getPublicPage(slug: string) {
     return request<DialPage>(`/api/public/dial-page/${slug}`)
+  },
+
+  submitFeedback(payload: FeedbackPayload) {
+    return request<null>('/api/feedback', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
   },
 }
