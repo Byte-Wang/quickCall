@@ -61,4 +61,34 @@ router.beforeEach((to) => {
   }
 })
 
+// 仅登录后的管理页面挂载 vConsole，用于在旧设备上排查白屏等问题。
+// 拨号页（/d/:slug）与登录页、注册页均不显示。
+let vConsole: { destroy: () => void } | null = null
+let shouldMount = false
+
+async function mountVConsole() {
+  shouldMount = true
+  if (vConsole) return
+  const { default: VConsole } = await import('vconsole')
+  // 异步加载期间若已离开管理页，则不再挂载
+  if (!shouldMount) return
+  vConsole = new VConsole()
+}
+
+function unmountVConsole() {
+  shouldMount = false
+  if (vConsole) {
+    vConsole.destroy()
+    vConsole = null
+  }
+}
+
+router.afterEach((to) => {
+  if (to.meta.auth) {
+    mountVConsole()
+  } else {
+    unmountVConsole()
+  }
+})
+
 export default router

@@ -1,5 +1,6 @@
 import { defineConfig, type Plugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import legacy from '@vitejs/plugin-legacy'
 import path from 'path'
 import Inspector from 'unplugin-vue-dev-locator/vite'
 
@@ -42,7 +43,17 @@ export default defineConfig({
   build: {
     sourcemap: 'hidden',
   },
-  plugins: [vue(), Inspector(), injectAnalytics()],
+  plugins: [
+    vue(),
+    // 针对旧版安卓 Chrome 等低版本浏览器：生成 legacy 产物 + polyfill（nomodule 回退），
+    // 同时把现代产物的语法目标也降到老浏览器可解析的范围，避免可选链 / 空值合并等
+    // ES2020+ 语法导致旧浏览器解析失败而白屏。
+    legacy({
+      targets: ['chrome >= 49', 'android >= 5', 'ios >= 9', 'safari >= 10'],
+    }),
+    Inspector(),
+    injectAnalytics(),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
