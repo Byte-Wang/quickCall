@@ -100,6 +100,11 @@ class DialPageController
             $values[] = $body['show_name'] ? 1 : 0;
         }
 
+        if (array_key_exists('show_phone', $body)) {
+            $fields[] = 'show_phone = ?';
+            $values[] = $body['show_phone'] ? 1 : 0;
+        }
+
         if ($fields) {
             $fields[] = 'updated_at = CURRENT_TIMESTAMP';
             $values[] = $id;
@@ -185,6 +190,7 @@ class DialPageController
         $p['avatar_size'] = (int)($p['avatar_size'] ?? 48);
         $p['phone_size'] = (int)($p['phone_size'] ?? 12);
         $p['show_name'] = (bool)($p['show_name'] ?? 1);
+        $p['show_phone'] = (bool)($p['show_phone'] ?? 1);
         return $p;
     }
 

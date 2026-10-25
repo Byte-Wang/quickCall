@@ -36,6 +36,7 @@ const columns = computed(() =>
 const isSingleColumn = computed(() => columns.value === 1)
 
 const showName = computed(() => page.value?.show_name !== false)
+const showPhone = computed(() => page.value?.show_phone !== false)
 const avatarSize = computed(() => page.value?.avatar_size || 48)
 const phoneSize = computed(() => page.value?.phone_size || 12)
 
@@ -345,6 +346,7 @@ onUnmounted(() => {
               {{ contact.name }}
             </span>
             <span
+              v-if="showPhone"
               class="mt-1 flex items-center gap-1 opacity-70"
               :style="{
                 color: contactTextColor(contact),

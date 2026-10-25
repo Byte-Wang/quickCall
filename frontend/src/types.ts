@@ -27,6 +27,7 @@ export interface DialPage {
   bg_image: string
   font_size: number
   show_name?: boolean
+  show_phone?: boolean
   avatar_size?: number
   phone_size?: number
   contact_count?: number

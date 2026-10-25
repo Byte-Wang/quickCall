@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS dial_pages (
   show_name TINYINT(1) NOT NULL DEFAULT 1 COMMENT '是否显示名字',
   avatar_size INT NOT NULL DEFAULT 48 COMMENT '头像大小(px)',
   phone_size INT NOT NULL DEFAULT 12 COMMENT '号码大小(px)',
+  show_phone TINYINT(1) NOT NULL DEFAULT 1 COMMENT '是否显示号码',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (id),
@@ -70,6 +71,9 @@ CREATE TABLE IF NOT EXISTS contacts (
 ALTER TABLE contacts ADD COLUMN speak_enabled TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否开启朗读名字';
 ALTER TABLE contacts ADD COLUMN audio_url VARCHAR(255) NOT NULL DEFAULT '' COMMENT '朗读音频路径';
 ALTER TABLE contacts ADD COLUMN audio_trigger VARCHAR(16) NOT NULL DEFAULT 'name' COMMENT '触发方式：name/avatar/longpress';
+
+-- 为已有数据库补充是否显示号码字段（重复执行安全）
+ALTER TABLE dial_pages ADD COLUMN show_phone TINYINT(1) NOT NULL DEFAULT 1 COMMENT '是否显示号码';
 
 -- 意见反馈表
 CREATE TABLE IF NOT EXISTS feedback (

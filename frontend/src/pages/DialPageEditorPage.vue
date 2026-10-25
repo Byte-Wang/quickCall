@@ -34,6 +34,7 @@ const form = ref({
   avatar_size: 48,
   phone_size: 12,
   show_name: true,
+  show_phone: true,
 })
 
 const showContactModal = ref(false)
@@ -60,6 +61,7 @@ async function load() {
       avatar_size: page.value.avatar_size ?? 48,
       phone_size: page.value.phone_size ?? 12,
       show_name: page.value.show_name ?? true,
+      show_phone: page.value.show_phone ?? true,
     }
   } catch (e) {
     toast((e as Error).message, 'error')
@@ -393,6 +395,24 @@ onMounted(load)
               <span
                 class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform"
                 :class="form.show_name ? 'translate-x-5' : 'translate-x-0'"
+              ></span>
+            </button>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-muted">显示号码</p>
+              <p class="text-xs text-muted mt-0.5">关闭后只显示头像与名字</p>
+            </div>
+            <button
+              type="button"
+              class="relative w-11 h-6 rounded-full transition-colors shrink-0"
+              :class="form.show_phone ? 'bg-accent' : 'bg-line'"
+              @click="form.show_phone = !form.show_phone"
+            >
+              <span
+                class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform"
+                :class="form.show_phone ? 'translate-x-5' : 'translate-x-0'"
               ></span>
             </button>
           </div>

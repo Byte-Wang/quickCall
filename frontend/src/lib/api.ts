@@ -10,6 +10,7 @@ export interface PagePayload {
   avatar_size?: number
   phone_size?: number
   show_name?: boolean
+  show_phone?: boolean
 }
 
 export interface ContactPayload {
