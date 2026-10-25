@@ -30,7 +30,11 @@ const contactId = computed(() => {
 })
 
 const columns = computed(() =>
-  columnCountFor(containerWidth.value, page.value?.font_size ?? 20),
+  columnCountFor(
+    containerWidth.value,
+    page.value?.font_size ?? 20,
+    page.value?.avatar_size ?? 48,
+  ),
 )
 
 const isSingleColumn = computed(() => columns.value === 1)

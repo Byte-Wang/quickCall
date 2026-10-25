@@ -441,7 +441,7 @@ onMounted(load)
               v-model.number="form.avatar_size"
               type="range"
               min="32"
-              max="160"
+              max="240"
               step="4"
               class="w-full accent-[var(--c-accent)]"
             />

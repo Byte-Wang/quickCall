@@ -38,10 +38,11 @@ export function avatarSizeFor(fontSize: number): number {
   return Math.round(Math.min(120, Math.max(44, fontSize * 2.4)))
 }
 
-// 根据容器宽度与字号计算列数（1~3 列）
-export function columnCountFor(width: number, fontSize: number): number {
+// 根据容器宽度、字号与头像尺寸计算列数（1~3 列）
+// 最小列宽需同时容纳名字文本与头像，避免头像过大时相邻列重叠
+export function columnCountFor(width: number, fontSize: number, avatarSize = 0): number {
   if (width <= 0) return 1
-  const minColumn = fontSize * 5.6
+  const minColumn = Math.max(fontSize * 5.6, avatarSize + 16)
   const cols = Math.floor(width / minColumn)
   return Math.max(1, Math.min(3, cols))
 }

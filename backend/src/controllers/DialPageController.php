@@ -87,7 +87,7 @@ class DialPageController
 
         if (array_key_exists('avatar_size', $body)) {
             $fields[] = 'avatar_size = ?';
-            $values[] = max(32, min(160, (int)$body['avatar_size']));
+            $values[] = max(32, min(240, (int)$body['avatar_size']));
         }
 
         if (array_key_exists('phone_size', $body)) {
