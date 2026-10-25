@@ -145,7 +145,7 @@ class DialPageController
         unset($page['user_id']);
 
         $stmt = Database::pdo()->prepare(
-            'SELECT id, dial_page_id, name, phone, avatar, bg_color, font_size, sort_order
+            'SELECT id, dial_page_id, name, phone, avatar, bg_color, font_size, speak_enabled, audio_url, audio_trigger, sort_order
              FROM contacts
              WHERE dial_page_id = ?
              ORDER BY sort_order ASC, id ASC'
@@ -210,6 +210,11 @@ class DialPageController
         $c['dial_page_id'] = (int)$c['dial_page_id'];
         $c['sort_order'] = (int)$c['sort_order'];
         $c['font_size'] = $c['font_size'] === null ? null : (int)$c['font_size'];
+        $c['speak_enabled'] = (bool)(int)($c['speak_enabled'] ?? 0);
+        $c['audio_url'] = (string)($c['audio_url'] ?? '');
+        $c['audio_trigger'] = in_array($c['audio_trigger'] ?? 'name', ['name', 'avatar', 'longpress'], true)
+            ? $c['audio_trigger']
+            : 'name';
         return $c;
     }
 

@@ -14,6 +14,11 @@ const loading = ref(true)
 const error = ref('')
 const dialing = ref<Contact | null>(null)
 
+const overlayContactId = ref<number | null>(null)
+let overlayTimer: number | null = null
+let lpTimer: number | null = null
+let lpFired = false
+
 const containerRef = ref<HTMLElement | null>(null)
 const containerWidth = ref(0)
 let observer: ResizeObserver | null = null
@@ -66,6 +71,96 @@ function contactTextColor(c: Contact): string {
 
 function dial(c: Contact) {
   window.location.href = `tel:${c.phone}`
+}
+
+function hasAudio(c: Contact): boolean {
+  return c.speak_enabled === true && !!c.audio_url
+}
+
+function audioTrigger(c: Contact): 'name' | 'avatar' | 'longpress' {
+  return c.audio_trigger || 'name'
+}
+
+function playNameAudio(c: Contact) {
+  if (!hasAudio(c)) return
+  try {
+    const audio = new Audio(apiUrl(c.audio_url))
+    audio.play().catch(() => {})
+  } catch {
+    // 忽略无法播放的错误
+  }
+}
+
+function clearLpTimer() {
+  if (lpTimer != null) {
+    window.clearTimeout(lpTimer)
+    lpTimer = null
+  }
+}
+
+function clearOverlayTimer() {
+  if (overlayTimer != null) {
+    window.clearTimeout(overlayTimer)
+    overlayTimer = null
+  }
+}
+
+function clearOverlay() {
+  clearOverlayTimer()
+  overlayContactId.value = null
+}
+
+function showDialOverlay(c: Contact) {
+  clearOverlay()
+  overlayContactId.value = c.id
+  overlayTimer = window.setTimeout(() => {
+    overlayContactId.value = null
+  }, 10000)
+}
+
+function onNameClick(c: Contact) {
+  if (audioTrigger(c) !== 'name') return
+  playNameAudio(c)
+}
+
+function onAvatarClick(c: Contact) {
+  if (lpFired) {
+    lpFired = false
+    return
+  }
+  clearLpTimer()
+
+  if (audioTrigger(c) === 'avatar' && hasAudio(c)) {
+    playNameAudio(c)
+    showDialOverlay(c)
+    return
+  }
+
+  clearOverlay()
+  dial(c)
+}
+
+function onAvatarLongPress(c: Contact) {
+  if (audioTrigger(c) !== 'longpress') return
+  playNameAudio(c)
+}
+
+function onAvatarPointerDown(c: Contact) {
+  lpFired = false
+  clearLpTimer()
+  lpTimer = window.setTimeout(() => {
+    lpFired = true
+    onAvatarLongPress(c)
+  }, 550)
+}
+
+function onAvatarPointerEnd() {
+  clearLpTimer()
+}
+
+function onOverlayClick(c: Contact) {
+  clearOverlay()
+  dial(c)
 }
 
 function setIconLink(rel: string, href: string) {
@@ -151,6 +246,8 @@ onMounted(() => {
 
 onUnmounted(() => {
   observer?.disconnect()
+  clearLpTimer()
+  clearOverlay()
 })
 </script>
 
@@ -185,11 +282,10 @@ onUnmounted(() => {
         class="grid gap-4 sm:gap-6"
         :style="{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }"
       >
-        <button
+        <div
           v-for="contact in page.contacts"
           :key="contact.id"
-          type="button"
-          class="flex rounded-2xl transition-transform active:scale-95"
+          class="flex rounded-2xl"
           :class="[
             isSingleColumn
               ? 'flex-row items-center gap-4 px-5 py-4'
@@ -201,15 +297,34 @@ onUnmounted(() => {
                 : 'hover:bg-ink/5',
           ]"
           :style="contact.bg_color ? { backgroundColor: contact.bg_color } : {}"
-          @click="dial(contact)"
         >
-          <AvatarBadge
-            :name="contact.name"
-            :phone="contact.phone"
-            :avatar="contact.avatar"
-            :size="avatarSize"
-            :font-size="Math.round(avatarSize * 0.4)"
-          />
+          <div
+            class="relative shrink-0"
+            role="button"
+            @pointerdown="onAvatarPointerDown(contact)"
+            @pointerup="onAvatarPointerEnd"
+            @pointerleave="onAvatarPointerEnd"
+            @pointercancel="onAvatarPointerEnd"
+            @click="onAvatarClick(contact)"
+            @contextmenu.prevent
+          >
+            <AvatarBadge
+              :name="contact.name"
+              :phone="contact.phone"
+              :avatar="contact.avatar"
+              :size="avatarSize"
+              :font-size="Math.round(avatarSize * 0.4)"
+            />
+            <button
+              v-if="overlayContactId === contact.id"
+              type="button"
+              class="absolute inset-0 z-10 rounded-full bg-black/50 flex flex-col items-center justify-center gap-0.5 text-white"
+              @click.stop="onOverlayClick(contact)"
+            >
+              <Phone class="w-5 h-5" />
+              <span class="text-[9px] leading-none">点击拨打</span>
+            </button>
+          </div>
 
           <div
             class="flex flex-col min-w-0"
@@ -218,10 +333,14 @@ onUnmounted(() => {
             <span
               v-if="showName"
               class="font-semibold leading-tight"
+              :class="{
+                'cursor-pointer': hasAudio(contact) && audioTrigger(contact) === 'name',
+              }"
               :style="{
                 color: contactTextColor(contact),
                 fontSize: `${effectiveFont(contact)}px`,
               }"
+              @click.stop="onNameClick(contact)"
             >
               {{ contact.name }}
             </span>
@@ -236,7 +355,7 @@ onUnmounted(() => {
               {{ contact.phone }}
             </span>
           </div>
-        </button>
+        </div>
       </div>
 
       <div

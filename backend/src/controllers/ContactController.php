@@ -26,6 +26,9 @@ class ContactController
         $avatar = trim((string)($body['avatar'] ?? ''));
         $bgColor = trim((string)($body['bg_color'] ?? ''));
         $fontSize = self::parseFontSize($body['font_size'] ?? null);
+        $spenabled = !empty($body['speak_enabled']) ? 1 : 0;
+        $audioUrl = trim((string)($body['audio_url'] ?? ''));
+        $audioTrigger = self::parseAudioTrigger($body['audio_trigger'] ?? 'name');
 
         $stmt = Database::pdo()->prepare(
             'SELECT COALESCE(MAX(sort_order), 0) + 1 AS next FROM contacts WHERE dial_page_id = ?'
@@ -34,10 +37,10 @@ class ContactController
         $next = (int)$stmt->fetch()['next'];
 
         $stmt = Database::pdo()->prepare(
-            'INSERT INTO contacts (dial_page_id, name, phone, avatar, bg_color, font_size, sort_order)
-             VALUES (?, ?, ?, ?, ?, ?, ?)'
+            'INSERT INTO contacts (dial_page_id, name, phone, avatar, bg_color, font_size, speak_enabled, audio_url, audio_trigger, sort_order)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         );
-        $stmt->execute([$pageId, $name, $phone, $avatar, $bgColor, $fontSize, $next]);
+        $stmt->execute([$pageId, $name, $phone, $avatar, $bgColor, $fontSize, $spenabled, $audioUrl, $audioTrigger, $next]);
 
         $id = (int)Database::pdo()->lastInsertId();
         Response::json(self::findOne($id, $user['id']));
@@ -54,11 +57,21 @@ class ContactController
         $fields = [];
         $values = [];
 
-        foreach (['name', 'phone', 'avatar', 'bg_color'] as $f) {
+        foreach (['name', 'phone', 'avatar', 'bg_color', 'audio_url'] as $f) {
             if (array_key_exists($f, $body)) {
                 $fields[] = "$f = ?";
                 $values[] = (string)$body[$f];
             }
+        }
+
+        if (array_key_exists('speak_enabled', $body)) {
+            $fields[] = 'speak_enabled = ?';
+            $values[] = !empty($body['speak_enabled']) ? 1 : 0;
+        }
+
+        if (array_key_exists('audio_trigger', $body)) {
+            $fields[] = 'audio_trigger = ?';
+            $values[] = self::parseAudioTrigger($body['audio_trigger']);
         }
 
         if (array_key_exists('font_size', $body)) {
@@ -170,6 +183,9 @@ class ContactController
         $contact['dial_page_id'] = (int)$contact['dial_page_id'];
         $contact['sort_order'] = (int)$contact['sort_order'];
         $contact['font_size'] = $contact['font_size'] === null ? null : (int)$contact['font_size'];
+        $contact['speak_enabled'] = (bool)(int)($contact['speak_enabled'] ?? 0);
+        $contact['audio_url'] = (string)($contact['audio_url'] ?? '');
+        $contact['audio_trigger'] = self::parseAudioTrigger($contact['audio_trigger'] ?? 'name');
         return $contact;
     }
 
@@ -188,5 +204,11 @@ class ContactController
             return null;
         }
         return max(12, min(72, (int)$value));
+    }
+
+    private static function parseAudioTrigger($value): string
+    {
+        $value = (string)$value;
+        return in_array($value, ['name', 'avatar', 'longpress'], true) ? $value : 'name';
     }
 }

@@ -39,6 +39,12 @@ if (str_starts_with($path, '/uploads/')) {
             'png' => 'image/png',
             'webp' => 'image/webp',
             'gif' => 'image/gif',
+            'mp3' => 'audio/mpeg',
+            'm4a' => 'audio/mp4',
+            'aac' => 'audio/aac',
+            'wav' => 'audio/wav',
+            'webm' => 'audio/webm',
+            'ogg' => 'audio/ogg',
         ];
         $mime = $mimes[$ext] ?? 'application/octet-stream';
 
@@ -77,6 +83,10 @@ if ($resource === 'auth') {
 
 if ($resource === 'upload' && $method === 'POST') {
     UploadController::upload();
+}
+
+if ($resource === 'upload-audio' && $method === 'POST') {
+    UploadController::uploadAudio();
 }
 
 if ($resource === 'feedback' && $method === 'POST') {

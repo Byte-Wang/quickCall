@@ -44,7 +44,15 @@ class Database
             if ($statement === '') {
                 continue;
             }
-            self::$pdo->exec($statement);
+            try {
+                self::$pdo->exec($statement);
+            } catch (PDOException $e) {
+                // 忽略「重复列名/索引名」错误，保证升级迁移可重复执行
+                $errno = (int)($e->errorInfo[1] ?? 0);
+                if (!in_array($errno, [1060, 1061], true)) {
+                    throw $e;
+                }
+            }
         }
     }
 }

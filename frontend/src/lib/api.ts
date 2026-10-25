@@ -18,6 +18,9 @@ export interface ContactPayload {
   avatar?: string
   bg_color?: string
   font_size?: number | null
+  speak_enabled?: boolean
+  audio_url?: string
+  audio_trigger?: 'name' | 'avatar' | 'longpress'
 }
 
 export interface FeedbackPayload {
@@ -103,6 +106,12 @@ export const api = {
     const fd = new FormData()
     fd.append('file', file)
     return request<UploadPayload>('/api/upload', { method: 'POST', body: fd })
+  },
+
+  uploadAudio(file: File) {
+    const fd = new FormData()
+    fd.append('file', file)
+    return request<UploadPayload>('/api/upload-audio', { method: 'POST', body: fd })
   },
 
   getPublicPage(slug: string) {

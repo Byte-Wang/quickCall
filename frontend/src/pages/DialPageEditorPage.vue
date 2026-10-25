@@ -105,6 +105,9 @@ async function onSaveContact(payload: {
   avatar: string
   bg_color: string
   font_size: number | null
+  speak_enabled: boolean
+  audio_url: string
+  audio_trigger: 'name' | 'avatar' | 'longpress'
 }) {
   try {
     if (editingContact.value) {

@@ -57,11 +57,19 @@ CREATE TABLE IF NOT EXISTS contacts (
   avatar VARCHAR(255) NOT NULL DEFAULT '' COMMENT '头像路径',
   bg_color VARCHAR(16) NOT NULL DEFAULT '' COMMENT '卡片背景色',
   font_size INT DEFAULT NULL COMMENT '自定义字号（为空则用页面默认）',
+  speak_enabled TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否开启朗读名字',
+  audio_url VARCHAR(255) NOT NULL DEFAULT '' COMMENT '朗读音频路径',
+  audio_trigger VARCHAR(16) NOT NULL DEFAULT 'name' COMMENT '触发方式：name/avatar/longpress',
   sort_order INT NOT NULL DEFAULT 0 COMMENT '排序',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (id),
   KEY idx_contacts_page (dial_page_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='号码';
+
+-- 为已有数据库补充朗读相关字段（重复执行安全）
+ALTER TABLE contacts ADD COLUMN speak_enabled TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否开启朗读名字';
+ALTER TABLE contacts ADD COLUMN audio_url VARCHAR(255) NOT NULL DEFAULT '' COMMENT '朗读音频路径';
+ALTER TABLE contacts ADD COLUMN audio_trigger VARCHAR(16) NOT NULL DEFAULT 'name' COMMENT '触发方式：name/avatar/longpress';
 
 -- 意见反馈表
 CREATE TABLE IF NOT EXISTS feedback (

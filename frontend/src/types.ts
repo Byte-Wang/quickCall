@@ -11,6 +11,9 @@ export interface Contact {
   avatar: string
   bg_color: string
   font_size: number | null
+  speak_enabled: boolean
+  audio_url: string
+  audio_trigger: 'name' | 'avatar' | 'longpress'
   sort_order?: number
 }
 
