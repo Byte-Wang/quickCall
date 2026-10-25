@@ -12,7 +12,6 @@ const route = useRoute()
 const page = ref<DialPage | null>(null)
 const loading = ref(true)
 const error = ref('')
-const dialing = ref<Contact | null>(null)
 
 const overlayContactId = ref<number | null>(null)
 let overlayTimer: number | null = null
@@ -74,10 +73,6 @@ function contactTextColor(c: Contact): string {
   return c.bg_color ? readableTextColor(c.bg_color) : textColor.value
 }
 
-function dial(c: Contact) {
-  window.location.href = `tel:${c.phone}`
-}
-
 function hasAudio(c: Contact): boolean {
   return c.speak_enabled === true && !!c.audio_url
 }
@@ -128,21 +123,23 @@ function onNameClick(c: Contact) {
   playNameAudio(c)
 }
 
-function onAvatarClick(c: Contact) {
+function onAvatarClick(c: Contact, e?: Event) {
   if (lpFired) {
     lpFired = false
+    e?.preventDefault()
     return
   }
   clearLpTimer()
 
   if (audioTrigger(c) === 'avatar' && hasAudio(c)) {
+    e?.preventDefault()
     playNameAudio(c)
     showDialOverlay(c)
     return
   }
 
   clearOverlay()
-  dial(c)
+  // 直接拨号：交给 <a href="tel:"> 的原生点击行为
 }
 
 function onAvatarLongPress(c: Contact) {
@@ -163,9 +160,9 @@ function onAvatarPointerEnd() {
   clearLpTimer()
 }
 
-function onOverlayClick(c: Contact) {
+function onOverlayClick() {
   clearOverlay()
-  dial(c)
+  // 直接拨号：交给 <a href="tel:"> 的原生点击行为
 }
 
 function setIconLink(rel: string, href: string) {
@@ -225,8 +222,6 @@ async function load() {
 
     if (target) {
       applyContactMeta(target)
-      dialing.value = target
-      setTimeout(() => dial(target), 500)
     } else {
       applyPageMeta(page.value.name)
     }
@@ -303,32 +298,34 @@ onUnmounted(() => {
           ]"
           :style="contact.bg_color ? { backgroundColor: contact.bg_color } : {}"
         >
-          <div
-            class="relative shrink-0"
-            role="button"
-            @pointerdown="onAvatarPointerDown(contact)"
-            @pointerup="onAvatarPointerEnd"
-            @pointerleave="onAvatarPointerEnd"
-            @pointercancel="onAvatarPointerEnd"
-            @click="onAvatarClick(contact)"
-            @contextmenu.prevent
-          >
-            <AvatarBadge
-              :name="contact.name"
-              :phone="contact.phone"
-              :avatar="contact.avatar"
-              :size="avatarSize"
-              :font-size="Math.round(avatarSize * 0.4)"
-            />
-            <button
+          <div class="relative shrink-0">
+            <a
+              :href="`tel:${contact.phone}`"
+              class="inline-block no-underline"
+              @pointerdown="onAvatarPointerDown(contact)"
+              @pointerup="onAvatarPointerEnd"
+              @pointerleave="onAvatarPointerEnd"
+              @pointercancel="onAvatarPointerEnd"
+              @click="onAvatarClick(contact, $event)"
+              @contextmenu.prevent
+            >
+              <AvatarBadge
+                :name="contact.name"
+                :phone="contact.phone"
+                :avatar="contact.avatar"
+                :size="avatarSize"
+                :font-size="Math.round(avatarSize * 0.4)"
+              />
+            </a>
+            <a
               v-if="overlayContactId === contact.id"
-              type="button"
-              class="absolute inset-0 z-10 rounded-full bg-black/50 flex flex-col items-center justify-center gap-0.5 text-white"
-              @click.stop="onOverlayClick(contact)"
+              :href="`tel:${contact.phone}`"
+              class="absolute inset-0 z-10 rounded-full bg-black/50 flex flex-col items-center justify-center gap-0.5 text-white no-underline"
+              @click.stop="onOverlayClick()"
             >
               <Phone class="w-5 h-5" />
               <span class="text-[9px] leading-none">点击拨打</span>
-            </button>
+            </a>
           </div>
 
           <div
@@ -370,20 +367,6 @@ onUnmounted(() => {
         :style="{ color: textColor }"
       >
         该拨号页还没有号码
-      </div>
-    </div>
-
-    <div v-if="dialing" class="fixed inset-0 z-50 grid place-items-center bg-black/50">
-      <div class="bg-white rounded-2xl px-8 py-6 text-center animate-pop">
-        <AvatarBadge
-          :name="dialing.name"
-          :phone="dialing.phone"
-          :avatar="dialing.avatar"
-          :size="64"
-          :font-size="22"
-        />
-        <p class="mt-3 font-semibold">正在拨打 {{ dialing.name }}</p>
-        <p class="mt-1 text-sm text-muted">{{ dialing.phone }}</p>
       </div>
     </div>
   </div>
