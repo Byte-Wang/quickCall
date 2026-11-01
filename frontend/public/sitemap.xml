@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  说明：本项目为 hash 路由的 Vue SPA，目前仅首页可被稳定索引。
+  域名请替换为实际线上域名。若要索引每个拨号页（/d/:slug），
+  需将路由改为 history 模式并为拨号页做服务端渲染/预渲染后再补充条目。
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://quickcall.wangdalong.top/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>

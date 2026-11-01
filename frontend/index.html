@@ -1,17 +1,76 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- 基础 SEO -->
+    <title>快拨通讯录 - 老人一键拨号，点头像就能打电话</title>
+    <meta
+      name="description"
+      content="快拨通讯录专为不识字老人设计，子女一次设置，长辈点开头像即可直接打电话；大字头像、一键拨号，解决老人不会用智能手机的难题。"
+    />
+    <meta
+      name="keywords"
+      content="快拨通讯录,老人一键拨号,老人打电话,简易拨号,不识字老人,老人电话簿,长辈通讯录,点头像打电话,老人手机助手,老人常用联系人"
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="快拨通讯录" />
+    <meta name="theme-color" content="#ff5a36" />
+
+    <!-- 域名替换为实际线上域名后可启用（当前为占位） -->
+    <link rel="canonical" href="https://quickcall.wangdalong.top/" />
+
+    <!-- Open Graph（微信 / 朋友圈 / Facebook 等社交分享卡片） -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="快拨通讯录" />
+    <meta property="og:title" content="快拨通讯录 - 老人一键拨号，点头像就能打电话" />
+    <meta
+      property="og:description"
+      content="专为不识字老人设计，子女一次设置，长辈点开头像即可直接打电话，解决老人不会用智能手机的难题。"
+    />
+    <meta property="og:url" content="https://quickcall.wangdalong.top/" />
+    <meta property="og:image" content="https://quickcall.wangdalong.top/icon.png" />
+    <meta property="og:locale" content="zh_CN" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="快拨通讯录 - 老人一键拨号，点头像就能打电话" />
+    <meta
+      name="twitter:description"
+      content="专为不识字老人设计，子女一次设置，长辈点开头像即可直接打电话。"
+    />
+    <meta name="twitter:image" content="https://quickcall.wangdalong.top/icon.png" />
+
     <link rel="icon" type="image/png" href="/icon.png" />
     <link rel="apple-touch-icon" href="/icon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="apple-mobile-web-app-title" content="快拨通讯录" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <title>快拨通讯录</title>
+
+    <!-- 结构化数据：帮助搜索引擎理解产品类型 -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "快拨通讯录",
+        "url": "https://quickcall.wangdalong.top/",
+        "description": "专为不识字老人设计的一键拨号通讯录，子女一次设置，长辈点开头像即可直接打电话。",
+        "applicationCategory": "CommunicationApplication",
+        "operatingSystem": "Web",
+        "inLanguage": "zh-CN",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "CNY"
+        }
+      }
+    </script>
     <script type="module">
       if (import.meta.hot?.on) {
         import.meta.hot.on('vite:error', (error) => {
@@ -25,7 +84,60 @@
     </script>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <!-- 首屏 SEO 静态内容：供不执行 JavaScript 的搜索引擎（如百度）抓取正文。
+           Vue 应用挂载后会自动替换为交互版首页，不影响正常使用。 -->
+      <main
+        style="max-width: 68rem; margin: 0 auto; padding: 3rem 1.25rem; font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif; line-height: 1.7; color: #201a17;"
+      >
+        <h1 style="font-size: 1.9rem; margin: 0 0 1rem;">
+          快拨通讯录 —— 老人一键拨号，点头像就能打电话
+        </h1>
+        <p style="max-width: 40rem; color: #5a514b;">
+          快拨通讯录专为不识字、用不惯智能手机的老人设计，子女只需一次设置，长辈点开头像即可直接拨打电话，解决老人不会用智能手机的难题。
+        </p>
+
+        <h2 style="font-size: 1.4rem; margin: 2rem 0 0.75rem;">老人用手机打电话的难题</h2>
+        <ul>
+          <li>通讯录联系人太多，老人翻来翻去找不到人</li>
+          <li>拨号盘和名字的字太小，长辈看不清</li>
+          <li>菜单、广告、弹窗太多，操作复杂容易点错</li>
+        </ul>
+
+        <h2 style="font-size: 1.4rem; margin: 2rem 0 0.75rem;">快拨通讯录的功能特点</h2>
+        <ul>
+          <li>大字头像：常用联系人用大头像展示，不识字也能一眼认出是谁</li>
+          <li>一键拨号：点一下头像，手机立即拨出电话，没有任何多余步骤</li>
+          <li>链接与二维码分享：子女把拨号页生成链接或二维码发给老人</li>
+          <li>语音点名：为联系人配上声音，看不清字也能听名字找对人</li>
+          <li>无需安装：微信里点开链接即用，不用下载 App</li>
+        </ul>
+
+        <h2 style="font-size: 1.4rem; margin: 2rem 0 0.75rem;">三步帮老人用起来</h2>
+        <ol>
+          <li>子女用手机号注册，创建一张长辈专属的拨号通讯录</li>
+          <li>添加亲友的头像和电话号码，配好清晰头像</li>
+          <li>把链接或二维码发给老人，点开头像即可打电话</li>
+        </ol>
+
+        <h2 style="font-size: 1.4rem; margin: 2rem 0 0.75rem;">常见问题</h2>
+        <h3 style="font-size: 1.1rem; margin: 1.25rem 0 0.4rem;">老人不识字，能自己打电话吗？</h3>
+        <p style="color: #5a514b;">可以。用大号头像代替文字，老人只要点一下头像就能拨出电话，全程不需要识字。</p>
+        <h3 style="font-size: 1.1rem; margin: 1.25rem 0 0.4rem;">需要给老人安装软件吗？</h3>
+        <p style="color: #5a514b;">不需要。拨号页是一个网页链接，子女设置好后发到老人手机，微信里点开就能用。</p>
+        <h3 style="font-size: 1.1rem; margin: 1.25rem 0 0.4rem;">怎么帮爸妈设置？</h3>
+        <p style="color: #5a514b;">子女注册后创建拨号页，添加常用联系人的头像和电话，再把链接或二维码保存到老人手机即可。</p>
+
+        <p style="margin-top: 2rem;">
+          <a
+            href="#/login"
+            style="display: inline-block; padding: 0.75rem 1.5rem; background: #ff5a36; color: #fff; border-radius: 0.75rem; text-decoration: none; font-weight: 600;"
+          >
+            立即开始使用
+          </a>
+        </p>
+      </main>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

@@ -2,12 +2,17 @@ import { createRouter, createWebHashHistory, type RouteRecordRaw } from 'vue-rou
 import { getToken } from '@/lib/http'
 import LoginPage from '@/pages/LoginPage.vue'
 import RegisterPage from '@/pages/RegisterPage.vue'
+import HomePage from '@/pages/HomePage.vue'
 import DashboardPage from '@/pages/DashboardPage.vue'
 import DialPageEditorPage from '@/pages/DialPageEditorPage.vue'
 import DialViewPage from '@/pages/DialViewPage.vue'
 
 const routes: RouteRecordRaw[] = [
-  { path: '/', redirect: '/admin' },
+  {
+    path: '/',
+    name: 'home',
+    component: HomePage,
+  },
   {
     path: '/login',
     name: 'login',
