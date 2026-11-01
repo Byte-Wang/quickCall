@@ -1,5 +1,7 @@
 # 快拨通讯录
 
+快速体验地址：https://quickcall.wangdalong.top/
+
 一个「快速拨打电话」的网页应用：用户用手机号注册登录后，可创建多个拨号页，每个拨号页生成唯一链接与二维码用于分享；访问者打开链接即可看到通讯录，点击头像一键拨出电话。
 
 - 前端：Vue 3 + TypeScript + Vite + TailwindCSS + Vue Router
